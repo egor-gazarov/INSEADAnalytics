@@ -1,37 +1,7 @@
-Session 2-3, Dimensionality Reduction and Derived Attributes (Technical Slides)
+Session 3-4, Dimensionality Reduction and Derived Attributes (Technical Slides)
 ========================================================
 title : Data Analytics for Business
 author : T. Evgeniou, INSEAD
-
-
-Why this class? Three goals
-========================================================
-  
-  
-1. Organizational Level: Develop your intuition about identifying data analytics opportunities and their implementation challenges  
-  
-  
-2. Project Level: Learn how to approach data analytics projects  
-  
-  
-3. Analysis Level: Learn how to perform, read, and use key data analytics methods.
-
-
- Data Analytics Processes: Iterative Process Cycle with a Lifetime
-========================================================
-
-
-  
-Step 1: Defining the Objective(s)  
-  
-  
-Step 2: Data Preparation and Exploration
-  
-  
-Step 3: Analysis
-  
-  
-Step 4: Performance Assessment
 
 
 
@@ -69,25 +39,26 @@ Factor Analysis: Key idea
 Dimensionality Reduction and Factor Analysis: 6 (Easy) Steps
 ========================================================
 
-1. Confirm the data is metric 
+1. Confirm data is metric
 
-2. Decide whether to scale or standardize the data
+2. Scale the  data
 
-3. Check the correlation matrix to see if Factor Analysis makes sense
+3. Check correlations
 
-4. Develop a scree plot and decide on the number of factors to be derived
+4. Choose number of factors 
 
-5. Interpret the factors (consider factor rotations - technical but useful)
+5. Interpret the factors
 
-6. Save factor scores for subsequent analyses
+6. Save factor scores
 
  Applying Factor Analysis: Evaluating MBA Applications
 ========================================================
 
 
 ```{r echo=FALSE, message=FALSE, prompt=FALSE, results='asis'}
+source("../../AnalyticsLibraries/library.R")
+source("../../AnalyticsLibraries/heatmapOutput.R")
 # let's make the data into data.matrix classes so that we can easier visualize them
-local_directory <- "/Users/theos/Documents/Theos/Teaching/MBA_COURSES/Data Analytics R version/CourseWebsite/CourseSessions/Sessions23"
 datafile_name="MBAadmin" #  do not add .csv at the end! make sure the data are numeric!!!! check your file!
 factor_attributes_used= c(1:7)
 factor_selectionciterion = "eigenvalue"
@@ -97,7 +68,7 @@ rotation_used="varimax"
 MIN_VALUE=0.5
 max_data_report = 50 # can also chance in server.R
 start_local_webapp <- 1
-ProjectData <- read.csv(paste(paste(local_directory, "data", sep="/"), paste(datafile_name,"csv", sep="."), sep = "/"), sep=";", dec=",") # this contains only the matrix ProjectData
+ProjectData <- read.csv(paste0("data/", datafile_name, ".csv")) # this contains only the matrix ProjectData
 ProjectData=data.matrix(ProjectData) 
 
 if (datafile_name == "Boats")
@@ -105,7 +76,6 @@ if (datafile_name == "Boats")
 
 factor_attributes_used = unique(sapply(factor_attributes_used,function(i) min(ncol(ProjectData), max(i,1))))
 ProjectDataFactor=ProjectData[,factor_attributes_used]
-source(paste(local_directory,"R/library.R", sep="/"))
 
 Variance_Explained_Table_results<-PCA(ProjectDataFactor, graph=FALSE)
 Variance_Explained_Table<-Variance_Explained_Table_results$eig
@@ -175,7 +145,7 @@ print(m1,'chart')
 </div>
 </div>
 
- Step 1: Confirm the data are metric 
+ Step 1: Confirm data is metric
 ========================================================
 
 
@@ -204,7 +174,7 @@ print(m1,'chart')
 </div>
 </div>
 
-Step 2: Decide whether to scale or standardize the data: Summary Statistics
+Step 2: Scale the  data
 ========================================================
 
 <style>
@@ -274,7 +244,7 @@ print(m1,'chart')
 </div>
 </div>
 
- Step 3:  Check correlation matrix to see if Factor Analysis makes sense
+ Step 3:  Check correlations 
 ========================================================
 
 <style>
@@ -303,7 +273,7 @@ print(m1,'chart')
 </div>
 </div>
 
- Step 4. Develop a scree plot and decide on the number of factors to be derived
+ Step 4. Choose number of factors 
 ========================================================
 
 For the method considered here (Principal Component Analysis):
@@ -381,7 +351,7 @@ Three criteria to use:
 
 Using the `r factor_selectionciterion` criterion we select `r factors_selected` factors. 
 
- Step 5. Interpret the factors 
+ Step 5. Interpret the factors
 ========================================================
 
 Rotated Selected Factors using the `r rotation_used` rotation.
@@ -463,7 +433,7 @@ print(m1,'chart')
 
 3. Any pair of factors (columns) should have different "patterns" of loading
 
- Step 6. Save factor scores for subsequent analyses
+ Step 6. Save factor scores 
 ========================================================
 
 <br>
