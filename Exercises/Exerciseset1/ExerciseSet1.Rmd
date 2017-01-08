@@ -2,10 +2,13 @@
 ---
 title: "Exercise Set 1"
 author: "T. Evgeniou"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
+runtime: shiny
 ---
 
-
+runtime: shiny
 <br>
 
 The purpose of this exercise is to become familiar with:
@@ -85,10 +88,9 @@ pnl_plot(SPY)
 3. *(Extra points)* What if we want to also see the returns of another company, say Yahoo!, in the same period? Can you get that data and report the statistics for Yahoo!'s stock, too? 
 
 **Your Answers here:**
-<br>
-<br>
-<br>
-<br>
+1. In dataSet1.R, in line 8 "mytickers = c("SPY", "AAPL")". Later code is being runned for all tickers asked in that line.
+2. 595.5%, 0.148%, 2.39%
+3. 288.7%, 0.072%, 3.02%
 
 <hr>
 <hr>
@@ -126,10 +128,15 @@ We can also transpose the matrix of returns to create a new "horizontal" matrix.
 2. Based on the help for the R function *apply* (`help(apply)`), can you create again the portfolio of S&P and Apple and plot the returns in a new figure below?
 
 **Your Answers here:**
-<br>
-<br>
-<br>
-<br>
+1.dim, nrow, ncol, str
+2.MARGIN argument in 'apply' should be set to 2.
+```{r}
+transposedData = t(StockReturns)
+portfolio = apply(transposedData,2,mean)
+names(portfolio) <- colnames(transposedData)
+pnl_plot(portfolio)
+```
+
 
 <hr>
 <hr>
@@ -144,10 +151,65 @@ This is an important step and will get you to think about the overall process on
 2. *(Extra Exercise)*  Can you get the returns of a few companies and plot the returns of an equal weighted portfolio with those companies during some period you select? 
 
 **Your Answers here:**
-<br>
-<br>
-<br>
-<br>
+1. Startdate is set in 'startDate = "2001-01-01"'. File does not give returns for the first day, so we have to set it to "2000-12-31"
+2.
+```{r}
+
+# rm(list=ls()) # Clean up the memory, if we want to rerun from scratch
+# source("helpersSet1.R")
+
+getdata.fromscratch = 1
+
+website_used = "yahoo" # can be "yahoo" or other ( see help(getSymbols) ). Depending on the website we may need to change the stock tickers' representation
+mytickers = c("AMZN", "WMT", "HD")  # Other tickers for example are "GOOG", "GS", "TSLA", "FB", "MSFT", 
+startDate = "2000-12-31"
+
+if (getdata.fromscratch){
+  # Get SPY first, to get all trading days
+  tmp<-as.matrix(try(getSymbols(Symbols="SPY",from = startDate,src = website_used, auto.assign=FALSE)))
+  StockPrices1=matrix(rep(0,nrow(tmp)*length(mytickers)), ncol=length(mytickers))
+  colnames(StockPrices1)<-mytickers; 
+  rownames(StockPrices1)<-rownames(tmp)
+  StockVolume1=StockPrices1
+  StockPrices1[,1] <- tmp[,6]
+  
+  for (ticker_index in 1:length(mytickers)){
+    ticker_to_get = mytickers[ticker_index]
+    print(paste("\nDownloading ticker ", ticker_to_get, " ..."))
+    tmpdata<-as.matrix(try(getSymbols(Symbols=ticker_to_get,from = startDate,auto.assign=FALSE)))
+    if (!inherits(tmpdata, "try-error"))
+    {
+      therownames=intersect(rownames(tmpdata),rownames(StockPrices))
+      tmpdata[is.na(tmpdata)] <- 0
+      StockPrices1[therownames,ticker_index]<-tmpdata[therownames,6] # adjusted close price
+      StockVolume1[therownames,ticker_index]<-tmpdata[therownames,5] # shares volume for now - need to convert to dollars later
+    } else {
+      cat(ticker_to_get," NOT found")
+    }
+  }
+  # Get the daily returns now. Use the simple percentage difference approach 
+  StockReturns1= ifelse(head(StockPrices1,-1)!=0, (tail(StockPrices1,-1)-head(StockPrices1,-1))/head(StockPrices1,-1),0) # note that this removes the first day as we have no way to get the returns then!
+  rownames(StockReturns1)<-tail(rownames(StockPrices1),-1) # adjust the dates by 1 day now
+  
+  # Now remove the first day from the other data, too
+  StockPrices1 = StockPrices1[rownames(StockReturns1),]
+  StockVolume1 = StockPrices1[rownames(StockReturns1),]
+  colnames(StockPrices1)<-mytickers
+  colnames(StockVolume1)<-mytickers
+  colnames(StockReturns1)<-mytickers
+  
+  save(StockReturns1,StockPrices1,StockVolume1, file = "DataSet2.Rdata")
+} else {
+  load("DataSet2.Rdata")
+}
+
+portfolio = apply(StockReturns1,1,mean)
+names(portfolio) <- rownames(StockReturns1)
+pnl_plot(portfolio)
+
+
+```
+
 
 <hr>
 <hr>
@@ -178,10 +240,8 @@ myData + StockReturns[1:40,])
 ```
 
 **Your Answers here:**
-<br>
-<br>
-<br>
-<br>
+1. It counts number of events where value in myData is not equal to value in StockReturns
+2. 
 
 <hr>
 <hr>
@@ -196,7 +256,7 @@ Can you now load another dataset from some CSV file and report some basic statis
 
 Finally, just for fun, one can add some interactivity in the report using [Shiny](http://rmarkdown.rstudio.com/authoring_shiny.html).All one needs to do is set the eval flag of the code chunk below (see the .Rmd file) to "TRUE", add the line "runtime: shiny" at the very begining of the .Rmd file, make the markdown output to be "html_document", and then press "Run Document". 
 
-```{r, eval=FALSE, echo = TRUE}
+```{r, eval=TRUE, echo = TRUE}
 sliderInput("startdate", "Starting Date:", min = 1, max = length(portfolio), 
             value = 1)
 sliderInput("enddate", "End Date:", min = 1, max = length(portfolio), 
