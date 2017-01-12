@@ -1,0 +1,22 @@
+---
+title: "First class exercise"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r , include=FALSE}
+GroupProjectData <- read.csv("data/Boats.csv", sep=";")
+
+```
+
+## Introduction
+
+This is our group project
+
+```{r , echo=FALSE}
+hist(GroupProjectData[,2])
+cor(GroupProjectData[,c(4,5)])
+```
+
+
